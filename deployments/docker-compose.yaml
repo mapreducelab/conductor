@@ -1,0 +1,15 @@
+version: "3.6"
+services:
+
+  conductor:
+    image: consul:1.1.0
+    restart: on-failure
+    environment:
+      - CONSUL_UI_BETA=true
+    ports:
+        - 8500:8500
+    networks:
+      - backend
+
+networks:
+  backend:

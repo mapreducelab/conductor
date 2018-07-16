@@ -1,0 +1,83 @@
+topology:
+  nodes:
+
+    - node:
+      id: ignite-node
+      network:
+        ignite_servers:
+          count: 1
+          rootname: ignite
+          domain: mapreducelab.com
+          exposed_ports:
+          - port: 513
+            type: transport
+          - port: 872
+            type: transport
+      region: us-west-1
+      pod: pod02
+      components:
+        - terraform
+        - ignite-1_0_5_0
+      connections:
+
+views:
+  platform:
+    components:
+
+    - component:
+      id: ignite-1_0_5_0
+      automation:
+        type: ANSIBLE
+        artifact:
+          name: ignite
+          version: 1.0.5.0
+          build: 12
+          type: rpm
+      opscontext:
+        users:
+          - user:
+            name: ansible
+        logging:
+          loglevel: ERROR
+        connections:
+          graphite:
+            hostname: gmon01
+            port: 2003
+            prefix: ignite
+        secrets:
+          ignite:
+            type: sshkey
+            private_key:
+        artifacts:
+          - name: ignite
+            version: 3.2.3-1.el7.centos
+          - name: dynomite
+            version: 0.6.7-4.el6
+      servicecontext:
+        ### Variables referenced in common.yaml
+        backup_ip: 12.32.43.66
+
+    - component:
+      id: terraform
+      automation:
+        type: terraform
+        artifact:
+          name: terraform
+          version: 1.0.3
+          build: 12
+          type: rpm
+      opscontext:
+        storage:
+          drive:
+            name: 303r-v207
+            type: VMFS5
+            location: "ds:///vmf/b2-246e968547a0/"
+        logging:
+          loglevel: ERROR
+        secrets:
+          ignite:
+            type: sshkey
+            public_key:
+      servicecontext:
+        ovf_path: /opt/conductor.ovf
+        vmdk_path: /opt/path/file.vmdk"
