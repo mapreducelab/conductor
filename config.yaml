@@ -1,0 +1,5 @@
+etcd:
+  host: etcd
+  port: 8500
+  schema: http
+  api_version: v1
