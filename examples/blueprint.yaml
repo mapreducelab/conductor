@@ -1,83 +1,213 @@
-topology:
-  nodes:
-
-    - node:
-      id: ignite-node
-      network:
-        ignite_servers:
-          count: 1
-          rootname: ignite
-          domain: mapreducelab.com
-          exposed_ports:
-          - port: 513
-            type: transport
-          - port: 872
-            type: transport
-      region: us-west-1
-      pod: pod02
-      components:
-        - terraform
-        - ignite-1_0_5_0
-      connections:
-
-views:
-  platform:
-    components:
-
-    - component:
-      id: ignite-1_0_5_0
-      automation:
-        type: ANSIBLE
-        artifact:
-          name: ignite
-          version: 1.0.5.0
-          build: 12
-          type: rpm
-      opscontext:
-        users:
-          - user:
-            name: ansible
-        logging:
-          loglevel: ERROR
-        connections:
-          graphite:
-            hostname: gmon01
-            port: 2003
-            prefix: ignite
-        secrets:
-          ignite:
-            type: sshkey
-            private_key:
-        artifacts:
-          - name: ignite
-            version: 3.2.3-1.el7.centos
-          - name: dynomite
-            version: 0.6.7-4.el6
-      servicecontext:
-        ### Variables referenced in common.yaml
-        backup_ip: 12.32.43.66
-
-    - component:
-      id: terraform
-      automation:
-        type: terraform
-        artifact:
-          name: terraform
-          version: 1.0.3
-          build: 12
-          type: rpm
-      opscontext:
-        storage:
-          drive:
-            name: 303r-v207
-            type: VMFS5
-            location: "ds:///vmf/b2-246e968547a0/"
-        logging:
-          loglevel: ERROR
-        secrets:
-          ignite:
-            type: sshkey
-            public_key:
-      servicecontext:
-        ovf_path: /opt/conductor.ovf
-        vmdk_path: /opt/path/file.vmdk"
+osEnv:
+  host: localhost
+  root: "~/Code/conductor"
+  tmp: "/tmp"
+project:
+  name: conductor
+  home: "~/Code/conductor/conductor"
+logging:
+  - name: conductor
+    file:
+      name: conductor
+      directory: "/tmp/log"
+      extension: log
+      pattern: datetime
+    main:
+      subject: conductor
+      list: aputra@qualys.com
+      cmd: "main -s "
+workflow:
+  host: localhost
+  staging: "/tmp"
+  test:
+    flag: true
+    functions: 
+      - getTask
+  urls:
+  directory: "~/Code/conductor/conductor"
+  cursor:
+    range:
+      - "2011-09-01:2011-12-31"
+    dateformat: "%Y%m"
+  timestamp: "2015-10-11 22:33:44"
+  tasks:
+    start:
+      desc: "start: processing for conductor is started"
+      start:
+      steps:
+      next:
+        success: task1
+        failure: exit
+    task1:
+      desc: "Create and remove a file in the temp directory"
+      start:
+        zero:
+          - step1
+      steps:
+        step1:
+          desc: "List files in temp"
+          next: 
+            success:
+              zero: 
+                - step2
+            failure:
+              nextStep: exit
+              maxFailures: 1
+              waitTime: 0s
+          call:
+            action: runShell
+            thread: 0
+            cursor:
+              range:
+                - 0
+              datatype: integer
+              format: 
+              increment: 1
+              inherit: false
+            exec:
+              url: localhost
+              cmd:
+                - "ls -ltr /tmp"
+                - "echo ~/Code/conductor/conductor"
+        step2:
+          desc: "Create and write to file for each cursor"
+          next: 
+            success:
+              zero: 
+                - step3
+            failure:
+              nextStep: exit
+              maxFailures: 1
+              waitTime: 0s
+          call:
+            action: runShell
+            thread: 0
+            cursor:
+              range:
+                - "2011-09-01:2011-12-01"
+              datatype: date
+              format: "%Y-%m-%d"
+              increment: 1M
+              inherit: false
+            exec:
+              url: localhost
+              cmd:
+                - "echo \"Cursor [%Y%m]\" > /tmp/[%Y%m].test"
+        step3:
+          desc: "List cursor file"
+          next: 
+            success:
+              zero: 
+                - step4
+            failure:
+              nextStep: step3a
+              maxFailures: 1
+              waitTime: 0s
+          call:
+            action: runShell
+            thread: 0
+            cursor:
+              range:
+                - "2011-09-01:2011-12-31"
+              datatype: date
+              format: "%Y-%m-%d"
+              increment: 1M
+              inherit: false
+            exec:
+              url: localhost
+              cmd:
+                - "ls -ltr /tmp/[%Y%m].test"
+        step3a:
+          desc: "Create missing cursor files"
+          next: 
+            success:
+              zero: 
+                - step3
+            failure:
+              nextStep: exit
+              maxFailures: 1
+              waitTime: 0s
+          call:
+            action: runShell
+            thread: 0
+            cursor:
+              range:
+                - "2011-10-01"
+              datatype: date
+              format: "%Y-%m-%d"
+              increment: 1M
+              inherit: true
+            exec:
+              url: localhost
+              cmd:
+                - "echo \"Cursor [%Y%m]\" > /tmp/[%Y%m].test"
+        step4:
+          desc: "Remove all cursor files"
+          next: 
+            success:
+              zero: 
+                - step5
+            failure:
+              nextStep: exit
+              maxFailures: 1
+              waitTime: 0s
+          call:
+            action: runShell
+            thread: 0
+            cursor:
+              range:
+                - "2011-09-01:2011-12-31"
+              datatype: date
+              format: "%Y-%m-%d"
+              increment: 1M
+              inherit: false
+            exec:
+              url: localhost
+              cmd:
+                - "rm /tmp/[%Y%m].test"
+        step5:
+          desc: "List the cursor file"
+          next: 
+            success:
+              zero: 
+                - exit
+            failure:
+              nextStep: exit
+              maxFailures: 1
+              waitTime: 0s
+          call:
+            action: runShell
+            thread: 0
+            cursor:
+              range:
+                - "2011-12-31"
+              datatype: date
+              format: "%Y-%m-%d"
+              increment: 1M
+              inherit: false
+            exec:
+              url: localhost
+              cmd:
+                - "ls -ltr /tmp/[%Y%m].test"
+        exit:
+          desc: "Data processing for conductor is finished"
+          next: 
+            success:
+              zero: 
+                - exit
+            failure:
+              nextStep: exit
+              maxFailures: 1
+              waitTime: 0s
+          call:
+            action: exit
+      next:
+        success: exit
+        failure: exit
+    exit: 
+      desc: "Data processing for conductor is finished"
+      start:
+      steps:
+      next:
+        success:
+        failure:
