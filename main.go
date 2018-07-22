@@ -15,15 +15,15 @@ func main() {
 
 	// Flags for maestro
 	const (
-		fileDefault   = ""
-		fileUsage     = "File to submit.\nUsage: -file /path/to/file"
-		regionDefault = ""
-		regionUsage   = "Region to submit\nUsage: -region us-west-1"
-		sourceDefault = ""
-		sourceUsage   = "Source to load job,\nUsage: -source-type file"
+		fileDefault    = ""
+		fileUsage      = "File to submit.\nUsage: -file /path/to/file"
+		jobNameDefault = ""
+		jobNameUsage   = "Job name to submit\nUsage: -job-name calculate1"
+		sourceDefault  = ""
+		sourceUsage    = "Source to load job,\nUsage: -source-type file"
 	)
 	fileInput := maestroCmd.String("file", fileDefault, fileUsage)
-	regionInput := maestroCmd.String("region", regionDefault, regionUsage)
+	jobNameInput := maestroCmd.String("job-name", jobNameDefault, jobNameUsage)
 	sourceInput := maestroCmd.String("source-type", sourceDefault, sourceUsage)
 
 	// Make sure that subcommand was provided
@@ -47,7 +47,7 @@ func main() {
 			maestroCmd.PrintDefaults()
 			os.Exit(1)
 		}
-		if *regionInput == "" {
+		if *jobNameInput == "" {
 			maestroCmd.PrintDefaults()
 			os.Exit(1)
 		}
@@ -59,12 +59,18 @@ func main() {
 		var m maestro.Maestro
 		m = maestro.NewService()
 
-		jobYaml, err := m.LoadJob(*fileInput, *sourceInput)
+		job, err := m.LoadJob(*fileInput, *sourceInput)
 		if err != nil {
 			log.Fatal(err)
 			os.Exit(1)
 		}
 
-		fmt.Println(jobYaml)
+		jobContent, err := m.Deploy(*jobNameInput, job)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+		fmt.Println(jobContent)
+
 	}
 }

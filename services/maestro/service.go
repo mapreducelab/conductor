@@ -2,54 +2,62 @@ package maestro
 
 import (
 	"conductor/models"
+	"conductor/providers"
 	"errors"
-	"fmt"
 	"io/ioutil"
-	"log"
 
 	yaml "gopkg.in/yaml.v2"
 )
 
 // Maestro submits job to key/value store.
 type Maestro interface {
-	LoadJob(string, string) (string, error)
-	Deploy(string, string) (bool, error)
-	Undeploy(string, string) (bool, error)
+	LoadJob(string, string) (models.Job, error)
+	Deploy(string, models.Job) (string, error)
+	Undeploy(string, models.Job) (bool, error)
 }
 
 type maestro struct{}
 
-func (maestro) LoadJob(location string, sourceType string) (string, error) {
+func (maestro) LoadJob(location string, sourceType string) (models.Job, error) {
 	if location == "" {
-		return "", errors.New("location was empty")
+		return models.Job{}, errors.New("location was empty")
 	}
 	if sourceType != "file" && sourceType != "url" {
-		return "", errors.New("source should be \"file\" or \"url\", but got: " + sourceType)
+		return models.Job{}, errors.New("source should be \"file\" or \"url\", but got: " + sourceType)
 	}
-
 	data, err := ioutil.ReadFile(location)
-	check(err)
+	if err != nil {
+		return models.Job{}, err
+	}
 
 	job := models.Job{}
-
 	err = yaml.Unmarshal([]byte(data), &job)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		return models.Job{}, err
 	}
-	fmt.Printf("%+v\n", job)
 
-	return "test", nil
+	return job, nil
 }
 
-func (maestro) Deploy(region string, job string) (bool, error) {
-	if region == "" {
-		return false, errors.New("Pod is empty string")
+func (maestro) Deploy(jobName string, job models.Job) (string, error) {
+	if jobName == "" {
+		return "", errors.New("Pod is empty string")
 	}
-	fmt.Printf("Region: %s, File: %s", region, job)
-	return true, nil
+	jobYaml, err := yaml.Marshal(&job)
+	if err != nil {
+		return "", err
+	}
+
+	etcd := providers.NewEtcd([]string{"localhost:2379"})
+	jobContent, err := etcd.SubmitJob(jobName, string(jobYaml))
+	if err != nil {
+		return "", err
+	}
+
+	return jobContent, nil
 }
 
-func (maestro) Undeploy(pod string, job string) (bool, error) {
+func (maestro) Undeploy(pod string, job models.Job) (bool, error) {
 	if pod == "" {
 		return false, errors.New("Pod is empty string")
 	}
@@ -59,10 +67,4 @@ func (maestro) Undeploy(pod string, job string) (bool, error) {
 // NewService placeholder for dependencies.
 func NewService() Maestro {
 	return &maestro{}
-}
-
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
 }
