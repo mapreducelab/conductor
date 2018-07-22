@@ -12,7 +12,7 @@ logging:
       directory: "/tmp/log"
       extension: log
       pattern: datetime
-    main:
+    mail:
       subject: conductor
       list: aputra@qualys.com
       cmd: "main -s "
@@ -31,25 +31,27 @@ workflow:
     dateformat: "%Y%m"
   timestamp: "2015-10-11 22:33:44"
   tasks:
-    start:
+    - name: start
       desc: "start: processing for conductor is started"
       start:
       steps:
       next:
         success: task1
         failure: exit
-    task1:
+    - name: task1
       desc: "Create and remove a file in the temp directory"
       start:
-        zero:
-          - step1
+        - order: 0
+          tasks:
+            - step1
       steps:
-        step1:
+        - name: step1
           desc: "List files in temp"
           next: 
             success:
-              zero: 
-                - step2
+              - order: 0
+                tasks:
+                  - step2
             failure:
               nextStep: exit
               maxFailures: 1
@@ -69,12 +71,13 @@ workflow:
               cmd:
                 - "ls -ltr /tmp"
                 - "echo ~/Code/conductor/conductor"
-        step2:
+        - name: step2
           desc: "Create and write to file for each cursor"
           next: 
             success:
-              zero: 
-                - step3
+              - order: 0
+                tasks:
+                  - step3
             failure:
               nextStep: exit
               maxFailures: 1
@@ -93,12 +96,13 @@ workflow:
               url: localhost
               cmd:
                 - "echo \"Cursor [%Y%m]\" > /tmp/[%Y%m].test"
-        step3:
+        - name: step3
           desc: "List cursor file"
           next: 
             success:
-              zero: 
-                - step4
+              - order: 0
+                tasks:
+                  - step4
             failure:
               nextStep: step3a
               maxFailures: 1
@@ -117,12 +121,13 @@ workflow:
               url: localhost
               cmd:
                 - "ls -ltr /tmp/[%Y%m].test"
-        step3a:
+        - name: step3a
           desc: "Create missing cursor files"
           next: 
             success:
-              zero: 
-                - step3
+              - order: 0
+                tasks:
+                  - step3
             failure:
               nextStep: exit
               maxFailures: 1
@@ -141,12 +146,13 @@ workflow:
               url: localhost
               cmd:
                 - "echo \"Cursor [%Y%m]\" > /tmp/[%Y%m].test"
-        step4:
+        - name: step4
           desc: "Remove all cursor files"
           next: 
             success:
-              zero: 
-                - step5
+              - order: 0
+                tasks:
+                  - step5
             failure:
               nextStep: exit
               maxFailures: 1
@@ -165,12 +171,13 @@ workflow:
               url: localhost
               cmd:
                 - "rm /tmp/[%Y%m].test"
-        step5:
+        - name: step5
           desc: "List the cursor file"
           next: 
             success:
-              zero: 
-                - exit
+              - order: 0
+                tasks:
+                  - exit
             failure:
               nextStep: exit
               maxFailures: 1
@@ -189,12 +196,13 @@ workflow:
               url: localhost
               cmd:
                 - "ls -ltr /tmp/[%Y%m].test"
-        exit:
+        - name: exit
           desc: "Data processing for conductor is finished"
           next: 
             success:
-              zero: 
-                - exit
+              - order: 0
+                tasks:
+                  - exit
             failure:
               nextStep: exit
               maxFailures: 1
@@ -204,7 +212,7 @@ workflow:
       next:
         success: exit
         failure: exit
-    exit: 
+    - name: exit
       desc: "Data processing for conductor is finished"
       start:
       steps:

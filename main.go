@@ -4,6 +4,7 @@ import (
 	"conductor/services/maestro"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -18,9 +19,12 @@ func main() {
 		fileUsage     = "File to submit.\nUsage: -file /path/to/file"
 		regionDefault = ""
 		regionUsage   = "Region to submit\nUsage: -region us-west-1"
+		sourceDefault = ""
+		sourceUsage   = "Source to load job,\nUsage: -source-type file"
 	)
 	fileInput := maestroCmd.String("file", fileDefault, fileUsage)
 	regionInput := maestroCmd.String("region", regionDefault, regionUsage)
+	sourceInput := maestroCmd.String("source-type", sourceDefault, sourceUsage)
 
 	// Make sure that subcommand was provided
 	if len(os.Args) < 2 {
@@ -47,10 +51,20 @@ func main() {
 			maestroCmd.PrintDefaults()
 			os.Exit(1)
 		}
+		if *sourceInput == "" {
+			maestroCmd.PrintDefaults()
+			os.Exit(1)
+		}
 
 		var m maestro.Maestro
 		m = maestro.NewService()
 
-		m.Deploy(*regionInput, *fileInput)
+		jobYaml, err := m.LoadJob(*fileInput, *sourceInput)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+
+		fmt.Println(jobYaml)
 	}
 }
