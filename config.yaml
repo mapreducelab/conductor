@@ -1,5 +1,5 @@
-etcd:
-  host: etcd
-  port: 8500
-  schema: http
-  api_version: v1
+etcd: localhost
+
+  # host: localhost
+  # port: 2379
+  # schema: http
