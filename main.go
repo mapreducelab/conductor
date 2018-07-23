@@ -1,7 +1,9 @@
 package main
 
 import (
+	"conductor/drivers"
 	"conductor/services/maestro"
+	"conductor/tests"
 	"flag"
 	"fmt"
 	"log"
@@ -11,7 +13,7 @@ import (
 func main() {
 	// Subcommands
 	maestroCmd := flag.NewFlagSet("maestro", flag.ExitOnError)
-	conductorCmd := flag.NewFlagSet("conductor", flag.ExitOnError)
+	workerCmd := flag.NewFlagSet("worker", flag.ExitOnError)
 
 	// Flags for maestro
 	const (
@@ -28,13 +30,13 @@ func main() {
 
 	// Make sure that subcommand was provided
 	if len(os.Args) < 2 {
-		fmt.Println("conductor or maestro subcommand is required.")
+		fmt.Println("worker or maestro subcommand is required.")
 		os.Exit(1)
 	}
 
 	switch os.Args[1] {
-	case "conductor":
-		conductorCmd.Parse(os.Args[2:])
+	case "worker":
+		workerCmd.Parse(os.Args[2:])
 	case "maestro":
 		maestroCmd.Parse(os.Args[2:])
 	default:
@@ -71,6 +73,19 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Println(jobContent)
+
+	}
+
+	if workerCmd.Parsed() {
+		callTestModel := tests.CallTest
+
+		shell := drivers.Shell{}
+		res, err := shell.Deploy(callTestModel)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+		fmt.Println(res)
 
 	}
 }

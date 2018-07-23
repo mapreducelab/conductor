@@ -57,7 +57,7 @@ workflow:
               maxFailures: 1
               waitTime: 0s
           call:
-            action: runShell
+            action: SHELL
             thread: 0
             cursor:
               range:
@@ -83,7 +83,7 @@ workflow:
               maxFailures: 1
               waitTime: 0s
           call:
-            action: runShell
+            action: SHELL
             thread: 0
             cursor:
               range:
@@ -108,7 +108,7 @@ workflow:
               maxFailures: 1
               waitTime: 0s
           call:
-            action: runShell
+            action: SHELL
             thread: 0
             cursor:
               range:
@@ -133,7 +133,7 @@ workflow:
               maxFailures: 1
               waitTime: 0s
           call:
-            action: runShell
+            action: SHELL
             thread: 0
             cursor:
               range:
@@ -158,7 +158,7 @@ workflow:
               maxFailures: 1
               waitTime: 0s
           call:
-            action: runShell
+            action: SHELL
             thread: 0
             cursor:
               range:
@@ -183,7 +183,7 @@ workflow:
               maxFailures: 1
               waitTime: 0s
           call:
-            action: runShell
+            action: SHELL
             thread: 0
             cursor:
               range:
