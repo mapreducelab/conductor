@@ -4,29 +4,27 @@ variables:
     type: timestamp
     value: '2015-10-11 22:33:44'
     format: YYYY-MM-DD HH24:MI:SS
-  rootdoc: "/tmp/workflow1"
+rootdoc: "/tmp/workflow1"
 type: workflow
 name: workflow1
 displayName: BTC/USD average exchange rate
 description: Retrieves BTC/USD exchange rate from 3 different exchanges, calculates
   an average and puts the latter into db
 input:
-  httpClientTimeout: "${httpClientTimeout}"
+  httpClientTimeout: 30
 start:
-  parallelism: '10'
-  multithread: 'true'
+  parallelism: 10
+  multithread: true
   subscribers:
-  - shell701
-
+    - shell701
 actions:
   - name: shell701
-    type: shell
+    type: SHELL
     displayName: Print average rate shell701
     description: Prints average BTC/USD rate in the canonical form
     next:
-      parallelism: '1'
-      multithread: 'false'
+      parallelism: 1
+      multithread: false
       subscribers:
     shellScript: cat /usr/local/var/calc-average/current-rate
-    output: "${stdout}"
-    
+    output:           # shell's stdout will be copied to next actions

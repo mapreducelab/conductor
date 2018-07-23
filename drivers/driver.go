@@ -4,5 +4,5 @@ import "conductor/models"
 
 // Driver interface
 type Driver interface {
-	Deploy(models.Call) (models.CallResult, error)
+	Deploy(models.Action) (models.ActionResult, error)
 }

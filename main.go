@@ -77,7 +77,7 @@ func main() {
 	}
 
 	if workerCmd.Parsed() {
-		callTestModel := tests.CallTest
+		callTestModel := tests.ActionTest
 
 		shell := drivers.Shell{}
 		res, err := shell.Deploy(callTestModel)

@@ -12,22 +12,19 @@ type Shell struct {
 }
 
 // Deploy func
-func (s Shell) Deploy(call models.Call) (models.CallResult, error) {
-	if len(call.Exec.Cmd) == 0 {
-		return models.CallResult{}, errors.New("call object does not have any commands to run")
+func (s Shell) Deploy(action models.Action) (models.ActionResult, error) {
+	if action.ShellScript == "" {
+		return models.ActionResult{}, errors.New("action object does not have any commands to run")
 	}
 
-	callCmds := call.Exec.Cmd
-	result := models.CallResult{}
+	result := models.ActionResult{}
 	shellProvider := providers.Shell{}
 
-	for _, cmd := range callCmds {
-		res, err := shellProvider.Exec(cmd)
-		if err != nil {
-			return models.CallResult{}, err
-		}
-		result.Output = append(result.Output, res)
+	res, err := shellProvider.Exec(action.ShellScript)
+	if err != nil {
+		return models.ActionResult{}, err
 	}
+	result.Output = append(result.Output, res)
 
 	return result, nil
 }

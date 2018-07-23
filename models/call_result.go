@@ -1,6 +1,6 @@
 package models
 
-// CallResult model
-type CallResult struct {
+// ActionResult model
+type ActionResult struct {
 	Output []string
 }
