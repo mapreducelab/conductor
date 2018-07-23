@@ -1,9 +1,8 @@
 package main
 
 import (
-	"conductor/drivers"
+	"conductor/engine"
 	"conductor/services/maestro"
-	"conductor/tests"
 	"flag"
 	"fmt"
 	"log"
@@ -77,15 +76,17 @@ func main() {
 	}
 
 	if workerCmd.Parsed() {
-		callTestModel := tests.ActionTest
+		// For tests
+		var m maestro.Maestro
+		m = maestro.NewService()
 
-		shell := drivers.Shell{}
-		res, err := shell.Deploy(callTestModel)
+		workflow, err := m.LoadJob("/Users/aputra/go/src/conductor/examples/shell-workflow.yaml", "file")
 		if err != nil {
 			log.Fatal(err)
 			os.Exit(1)
 		}
-		fmt.Println(res)
 
+		w := engine.Workflow{}
+		w.ProcessWorkflow(workflow)
 	}
 }

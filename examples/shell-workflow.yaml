@@ -26,5 +26,16 @@ actions:
       parallelism: 1
       multithread: false
       subscribers:
-    shellScript: cat /usr/local/var/calc-average/current-rate
+        - shell702
+    shellScript: ls -ltr /tmp
+    output:           # shell's stdout will be copied to next actions
+  - name: shell702
+    type: SHELL
+    displayName: Print average rate shell701
+    description: Prints average BTC/USD rate in the canonical form
+    next:
+      parallelism: 1
+      multithread: false
+      subscribers:
+    shellScript: echo "test 2"
     output:           # shell's stdout will be copied to next actions
