@@ -1,0 +1,56 @@
+---
+topology:
+  jobs:
+
+    - id: workflow1
+      type: WORKFLOW
+      displayName: BTC/USD average exchange rate
+      description: Retrieves BTC/USD exchange rate from 3 different exchanges, calculates an average and puts the latter into db.
+      cpu: 4
+      components:
+        - websvc101
+        - websvc201
+        - websvc301
+      subscribers:
+
+components:
+  - id: websvc101
+    type: REST
+    displayName: CEX.io websvc101
+    description: Request BTC/USD rate from CEX.io
+    parallelism: 1
+    network:
+      url: "https://cex.io/api/last_price/BTC/USD"
+      port: 80
+      auth: token
+    secrets:
+      - type: token
+        token:
+    requestInput: false
+    result:
+    subscribers:
+      - websvc102
+    servicecontext:
+      httpClientTimeout: 30
+      httpMethod: GET
+  - id: websvc102
+    type: REST
+    displayName: CEX.io-Transform websvc102
+    description: Transforms answer from CEX.io to a canonical form
+    parallelism: 1
+    network:
+      url: https://localservice.noetl.io/transform-cexio
+      port: 80
+      auth: token
+    secrets:
+      - type: token
+        token:
+    requestInput: true
+    result:
+    subscribers:
+      - ssh501
+    servicecontext:
+      httpClientTimeout: 30
+      httpMethod: POST
+      contentType: application/json
+      requestBody: "${input}"

@@ -1,0 +1,43 @@
+---
+topology:
+  nodes:
+
+  - id: master01
+    network:
+      count: 1
+      rootname: kubernetes
+      domain: p02.eng.sjc01.qualys.com
+      exposed_ports:
+      - port: 50171
+        type: transport
+    region: ENG-PreProd
+    pod: SJC01-ENG-CLUSTER
+    components:
+    - vcenter
+    connections:
+
+views:
+  platform:
+    components:
+
+    - id: vcenter
+      automation:
+        type: VCENTER
+        artifact:
+          name: vcenter
+          version: 1.0.3
+          build: 12
+          type: rpm
+      opscontext:
+        storage:
+          drive:
+            name: "303-441072-r6-10k-sjc01-eng-cluster-v207"
+            type: VMFS5
+            location: "ds:///vmfs/volumes/5a331d67-186ea7ca-12b2-246e968547a0/"
+        logging:
+          loglevel: ERROR
+        secrets:
+        - type: sshkey
+          secret:
+      servicecontext:
+        ovf_path: /opt/conductor/vmware/centos-2g-16g-server-jre.ovf

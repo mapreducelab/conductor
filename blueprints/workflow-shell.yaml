@@ -1,0 +1,33 @@
+---
+topology:
+  workflows:
+
+  - id: workflow1
+    rootdoc: "/tmp/workflow1"
+    displayName: Creates file and prints dir content.
+    cpu: 6
+    components:
+      - listTmpFiles
+    subscribers:
+
+views:
+  workflow:
+    components:
+
+    - id: listTmpFiles
+      type: SHELL
+      displayName: Print files in /tmp dir.
+      parallelism: 1
+      network:
+        url: localhost
+        port: 22
+        auth: creds
+      secrets:
+        - type: user
+          secret:
+        - type: password
+          secret:
+      requestInput: false
+      result:
+      servicecontext:
+        shellScript: ls -ltr /tmp

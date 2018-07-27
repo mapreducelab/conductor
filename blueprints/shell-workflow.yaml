@@ -18,24 +18,49 @@ start:
   subscribers:
     - shell701
 actions:
+
   - name: shell701
     type: SHELL
     displayName: Print average rate shell701
     description: Prints average BTC/USD rate in the canonical form
+    args:
+      shellScript: ls -ltr /tmp
+    output:           # shell's stdout will be copied to next actions
     next:
       parallelism: 1
       multithread: false
       subscribers:
         - shell702
-    shellScript: ls -ltr /tmp
-    output:           # shell's stdout will be copied to next actions
+
   - name: shell702
     type: SHELL
     displayName: Print average rate shell701
     description: Prints average BTC/USD rate in the canonical form
+    args:
+      shellScript: echo "test 2"
+      sshHost: scripthost.noetl.io
+      sshPort: '22'
+      sshUser: scripter
+      sshIdentityFile: "/home/noetl/ssh-keys/scripthost.pem"
+      shellScript: "/usr/local/bin/calc-average"
+      scriptParams: "${input}"
+    output:           # shell's stdout will be copied to next actions
     next:
       parallelism: 1
       multithread: false
       subscribers:
-    shellScript: echo "test 2"
-    output:           # shell's stdout will be copied to next actions
+
+  - name: websvc101
+    type: webservice
+    args:
+      httpClientTimeout: "${inputData.httpClientTimeout}"
+      httpMethod: GET
+      url: https://cex.io/api/last_price/BTC/USD
+    displayName: CEX.io websvc101
+    description: Request BTC/USD rate from CEX.io
+    output: "${responseBody}"
+    next:
+      parallelism: '1'
+      multithread: 'false'
+      subscribers:
+      - websvc102

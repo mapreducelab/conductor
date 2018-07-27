@@ -11,40 +11,40 @@ import (
 
 // Maestro submits job to key/value store.
 type Maestro interface {
-	LoadJob(string, string) (models.Workflow, error)
-	Deploy(string, models.Workflow) (string, error)
-	Undeploy(string, models.Workflow) (bool, error)
+	LoadJob(string, string) (models.Blueprint, error)
+	Deploy(string, models.Blueprint) (string, error)
+	Undeploy(string, models.Blueprint) (bool, error)
 }
 
 type maestro struct{}
 
-func (maestro) LoadJob(location string, sourceType string) (models.Workflow, error) {
+func (maestro) LoadJob(location string, sourceType string) (models.Blueprint, error) {
 	if location == "" {
-		return models.Workflow{}, errors.New("location was empty")
+		return models.Blueprint{}, errors.New("location was empty")
 	}
 	if sourceType != "file" && sourceType != "url" {
-		return models.Workflow{}, errors.New("source should be \"file\" or \"url\", but got: " + sourceType)
+		return models.Blueprint{}, errors.New("source should be \"file\" or \"url\", but got: " + sourceType)
 	}
 	data, err := ioutil.ReadFile(location)
 	if err != nil {
-		return models.Workflow{}, err
+		return models.Blueprint{}, err
 	}
 
-	job := models.Workflow{}
+	job := models.Blueprint{}
 	err = yaml.Unmarshal([]byte(data), &job)
 	if err != nil {
-		return models.Workflow{}, err
+		return models.Blueprint{}, err
 	}
 
 	return job, nil
 }
 
-func (maestro) Deploy(jobName string, job models.Workflow) (string, error) {
+func (maestro) Deploy(jobName string, blueprint models.Blueprint) (string, error) {
 	if jobName == "" {
 		return "", errors.New("Pod is empty string")
 	}
 
-	jobYaml, err := yaml.Marshal(&job)
+	jobYaml, err := yaml.Marshal(&blueprint)
 	if err != nil {
 		return "", err
 	}
@@ -58,7 +58,7 @@ func (maestro) Deploy(jobName string, job models.Workflow) (string, error) {
 	return jobContent, nil
 }
 
-func (maestro) Undeploy(pod string, job models.Workflow) (bool, error) {
+func (maestro) Undeploy(pod string, job models.Blueprint) (bool, error) {
 	if pod == "" {
 		return false, errors.New("Pod is empty string")
 	}

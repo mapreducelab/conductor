@@ -80,11 +80,17 @@ func main() {
 		var m maestro.Maestro
 		m = maestro.NewService()
 
-		workflow, err := m.LoadJob("/Users/aputra/go/src/conductor/examples/shell-workflow.yaml", "file")
+		workflow, err := m.LoadJob("/Users/aputra/go/src/conductor/blueprints/kubernetes_p02.yaml", "file")
 		if err != nil {
 			log.Fatal(err)
 			os.Exit(1)
 		}
+		res, err := m.Deploy("workflow1", workflow)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+		fmt.Println(res)
 
 		w := engine.Workflow{}
 		w.ProcessWorkflow(workflow)

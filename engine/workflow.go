@@ -1,9 +1,7 @@
 package engine
 
 import (
-	"conductor/drivers"
 	"conductor/models"
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -12,32 +10,24 @@ import (
 type Workflow struct{}
 
 // ProcessWorkflow creates a DIAG graph and process its components
-func (w Workflow) ProcessWorkflow(workflow models.Workflow) error {
-	if len(workflow.Actions) == 0 {
-		return errors.New("Workflow is empty")
-	}
+func (w Workflow) ProcessWorkflow(workflow models.Blueprint) error {
 
-	for _, action := range workflow.Actions {
-		processAction(action)
+	for _, component := range workflow.Views.Platform.Components {
+		processAction(component)
 	}
 
 	return nil
 }
 
-func processAction(action models.Action) error {
-	if action.Name == "" {
-		return errors.New("action is empty")
-	}
-	// TODO dynamicly load drivers
-	switch t := action.Type; strings.ToUpper(t) {
+func processAction(component models.Component) error {
+
+	switch t := component.Automation.Type; strings.ToUpper(t) {
 	case "SHELL":
-		s := drivers.Shell{}
-		res, _ := s.Deploy(action)
-		fmt.Println(res)
+		fmt.Println("result")
 	default:
 		fmt.Printf("%v - wrong driver type", t)
 	}
 
-	fmt.Println(action)
+	fmt.Println(component)
 	return nil
 }

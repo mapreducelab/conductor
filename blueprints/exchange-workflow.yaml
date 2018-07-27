@@ -20,6 +20,7 @@ start:
   - websvc201
   - websvc301
 actions:
+
   - name: websvc101
     type: webservice
     displayName: CEX.io websvc101
@@ -33,6 +34,13 @@ actions:
     httpMethod: GET
     url: https://cex.io/api/last_price/BTC/USD
     output: "${responseBody}"
+
+
+
+
+
+
+
   - name: websvc102
     type: webservice
     displayName: CEX.io-Transform websvc102
@@ -48,6 +56,11 @@ actions:
     url: https://localservice.noetl.io/transform-cexio
     requestBody: "${input}"
     output: "${responseBody}"
+
+
+
+
+
   - name: websvc201
     type: webservice
     displayName: Bitfinex websvc201
@@ -61,6 +74,11 @@ actions:
     httpMethod: GET
     url: https://api.bitfinex.com/v1/pubticker/btcusd
     output: "${responseBody}"
+
+
+
+
+
   - name: jdbc202
     type: jdbc
     displayName: Bitfinex-Transform jdbc202
@@ -110,12 +128,13 @@ actions:
       multithread: 'false'
       subscribers:
       - scp601
-    sshHost: scripthost.noetl.io
-    sshPort: '22'
-    sshUser: scripter
-    sshIdentityFile: "/home/noetl/ssh-keys/scripthost.pem"
-    shellScript: "/usr/local/bin/calc-average"
-    scriptParams: "${input}"
+    args:
+      sshHost: scripthost.noetl.io
+      sshPort: '22'
+      sshUser: scripter
+      sshIdentityFile: "/home/noetl/ssh-keys/scripthost.pem"
+      shellScript: "/usr/local/bin/calc-average"
+      scriptParams: "${input}"
   - name: scp601
     type: scp
     displayName: Transfer average rate scp601
@@ -158,4 +177,3 @@ actions:
     queryParams:
     - "${input}"
     output: "${queryResult}"
-
